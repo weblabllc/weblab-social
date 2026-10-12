@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:GS;font-weight:600;src:url(../carousel/node_modules/@fontsource/google-sans/files/google-sans-latin-600-normal.woff2) format('woff2')}
+body{margin:0;background:#333}
+.av{position:relative;width:1080px;height:1080px;overflow:hidden;margin-bottom:20px;
+ background:radial-gradient(620px 620px at 50% 56%, rgba(20,153,140,.20), rgba(20,153,140,0) 100%), #0B0A08;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:GS,sans-serif;color:#F3EEE6}
+.wordmark{display:inline-flex;align-items:baseline;font-weight:600;letter-spacing:-0.02em;line-height:1}
+.wordmark svg{width:.66em;height:.76em;margin:0 .07em;transform:translateY(.015em);overflow:visible}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<clipPath id="fl"><path d="M196 24H284V46H268V132L404 396Q409 404 400 404H80Q71 404 76 396L212 132V46H196Z"/></clipPath>
+<linearGradient id="liq" x1="240" y1="404" x2="240" y2="230" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0D7A70"/><stop offset="1" stop-color="#14998C"/></linearGradient>
+<symbol id="flask" viewBox="68 16 344 396" overflow="visible">
+<path d="M196 24H284V46H268V132L404 396Q409 404 400 404H80Q71 404 76 396L212 132V46H196Z" fill="rgba(20,153,140,.16)"/>
+<g clip-path="url(#fl)"><path d="M150 252Q240 234 330 252L412 412H68Z" fill="url(#liq)"/><path d="M150 252Q240 234 330 252" fill="none" stroke="#F6DCAE" stroke-width="10" stroke-linecap="round" opacity=".7"/></g>
+<path d="M196 24H284V46H268V132L404 396Q409 404 400 404H80Q71 404 76 396L212 132V46H196Z" fill="none" stroke="#F0E2C8" stroke-width="30" stroke-linejoin="round"/>
+<path d="M212 46H196V24H284V46H268" fill="none" stroke="#E8A54B" stroke-width="32" stroke-linecap="square" stroke-linejoin="round"/>
+</symbol></defs></svg>
+
+<div class="av" id="a"><span class="wordmark" style="font-size:214px">WebL<svg><use href="#flask"/></svg>b</span></div>
+
+<div class="av" id="b">
+  <svg width="430" height="495" viewBox="68 16 344 396" style="overflow:visible;margin-top:-40px"><use href="#flask"/></svg>
+  <span class="wordmark" style="font-size:150px;margin-top:56px">WebL<svg><use href="#flask"/></svg>b</span>
+</div>
+
+<div class="av" id="c">
+  <svg width="360" height="414" viewBox="68 16 344 396" style="overflow:visible;margin-top:-30px"><use href="#flask"/></svg>
+  <span style="margin-top:58px;font-weight:600;font-size:150px;letter-spacing:-0.02em;line-height:1">WebLab</span>
+</div>
+</body></html>
