@@ -15,7 +15,7 @@ head = base.split("</head>")[0] + """
 .chk p { margin: 0; color: var(--paper-dim); font-size: 30px; line-height: 1.45; }
 .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 56px; }
 .vs .card h3 { margin: 0 0 18px; font-size: 34px; font-weight: 600; }
-.vs .card p { margin: 0 0 12px; color: var(--paper-dim); font-size: 27px; line-height: 1.4; }
+.vs .card p { margin: 0 0 14px; color: var(--paper-dim); font-size: 30px; line-height: 1.4; }
 .metric { display: grid; grid-template-columns: 270px 1fr; gap: 28px; align-items: center; padding: 30px 0; border-top: 1px solid var(--hair); }
 .metric:last-child { border-bottom: 1px solid var(--hair); }
 .metric .v { white-space: nowrap; font-size: 60px; font-weight: 600; letter-spacing: -0.03em; color: var(--teal); }
@@ -204,39 +204,197 @@ POSTS = {
     ],
 }
 
-ONLY = set(sys.argv[1:])
-if ONLY:
-    POSTS = {k: v for k, v in POSTS.items() if k in ONLY}
 
-out_root = HERE / "out"
-html_parts = []
-for slug, slides in POSTS.items():
-    total = len(slides)
-    for i, (kind, inner, right) in enumerate(slides, 1):
-        sid = f"{slug}--{i:02d}"
-        foot_right = right if right else "Далі →"
-        foot_left = "weblab.llc"
-        html_parts.append(slide(sid, i, total, inner, foot_right, foot_left))
+def note(text):
+    return f'<div class="card" style="margin-top:44px"><p style="margin:0; font-size:30px; line-height:1.45;">{text}</p></div>'
 
-page = head + "<body>" + defs + "\n".join(html_parts) + "</body></html>"
-(HERE / "posts.html").write_text(page)
 
-with sync_playwright() as p:
-    b = p.chromium.launch()
-    pg = b.new_page(viewport={"width": 1080, "height": 1350})
-    pg.goto((HERE / "posts.html").resolve().as_uri())
-    pg.evaluate("document.fonts.ready")
-    pg.wait_for_timeout(700)
+def labeled(label, text, warn=False):
+    col = ' style="margin-bottom:14px; font-size:20px; color:#FF9D9D;"' if warn else ' style="margin-bottom:14px; font-size:20px;"'
+    return (f'<div class="card" style="margin-top:44px"><p class="kicker"{col}>{label}</p>'
+            f'<p style="margin:0; font-size:32px; line-height:1.45;">{text}</p></div>')
+
+
+def big(n, inner):
+    return f'<div style="position:relative; margin-top: 20px;"><p class="big-n">{n}</p>{inner}</div>'
+
+
+def procon(pros, cons):
+    def card(title, items, sign, color):
+        rows = "".join(f'<p><span style="color:{color}; font-weight:600;">{sign}</span> {t}</p>' for t in items)
+        return f'<div class="card"><h3>{title}</h3>{rows}</div>'
+    return '<div class="vs">' + card("Плюси", pros, "+", "#14998C") + card("Мінуси", cons, "−", "#FF9D9D") + "</div>"
+
+
+def tags(*names):
+    return ('<div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:72px;">'
+            + "".join(f'<span class="tag">{n}</span>' for n in names) + "</div>")
+
+
+POSTS.update({
+    "2026-10-20-website-cost": [
+        ("cover", cover("Ціни", 'Скільки коштує сайт <span class="tl">і з чого складається ціна</span>',
+                        "Чому дві студії називають різні суми за «той самий» сайт і що насправді входить у кошторис."), SWIPE),
+        ("b", body("Складові 1–4", "З чого складається ціна", nlist([
+            ("Дослідження і структура", "Сторінки, сценарії користувача, тексти, які треба написати."),
+            ("Дизайн", "Готовий шаблон чи унікальні макети під десктоп і мобільний."),
+            ("Розробка", "Верстка, логіка, адмінка, анімації."),
+            ("Інтеграції", "CRM, оплата, доставка, облік — кожна рахується окремо."),
+        ])), None),
+        ("b", body("Складові 5–7", "Що часто забувають порахувати", nlist([
+            ("Контент", "Тексти, фото, переклади. Хто їх готує і коли?"),
+            ("Запуск", "Хостинг, домен, аналітика, базове SEO."),
+            ("Підтримка", "Оновлення, правки й резервні копії після релізу."),
+        ], 5)), None),
+        ("b", body("Чому ціни різні", "«Той самий сайт» рідко той самий", chk([
+            ("Різний обсяг", "Одна студія врахувала інтеграції й тексти, інша — ні."),
+            ("Шаблон чи кастом", "Готова тема дешевша на старті, але її стеля настає швидко."),
+            ("Що після запуску", "Гарантія, підтримка, швидкість реакції на проблеми."),
+        ])), None),
+        ("b", body("Як порівнювати", "Порівнюйте кошториси, а не суми",
+                   '<p class="body">Попросіть розбивку за етапами і перелік того, що <span class="em">не входить</span> у ціну.</p>'
+                   + labeled("Правило", "Чесний кошторис завжди має розділ «не входить у вартість». Якщо його немає — уточніть до підписання.")), None),
+        ("cta", cta("Даємо кошторис з розбивкою за етапами", "Щоб ви бачили, за що платите, і могли чесно порівняти.", "Отримати кошторис"), SAVE),
+    ],
+    "2026-10-21-ai-tasks": [
+        ("cover", cover("ШІ для бізнесу", '6 задач, які <span class="tl">ШІ вже бере на себе</span>',
+                        "Не «штучний інтелект замість людей», а конкретна рутина, яку можна віддати вже зараз."), SWIPE),
+        ("b", body("Задачі 1–3", "Клієнти і заявки", nlist([
+            ("Відповіді клієнтам", "Чат на сайті чи в Telegram відповідає з вашої бази знань і передає складне людині."),
+            ("Сортування заявок", "Визначає тему й терміновість і відправляє потрібному менеджеру."),
+            ("Обробка документів", "Витягує дані з рахунків, договорів і анкет у таблицю чи CRM."),
+        ])), None),
+        ("b", body("Задачі 4–6", "Рутина в команді", nlist([
+            ("Чернетки пропозицій", "Комерційні пропозиції й листи за шаблоном — людина лише вичитує."),
+            ("Підсумки дзвінків і листування", "Що домовились, хто що робить, які терміни."),
+            ("Перший відбір", "Резюме, відгуки, заявки — сортування до того, як подивиться людина."),
+        ], 4)), None),
+        ("b", body("Важливо", "Що має бути в кожному сценарії", chk([
+            ("Людина в контурі", "Складні й ризиковані випадки йдуть на перевірку."),
+            ("Ваші дані", "ШІ відповідає з ваших документів, а не вигадує."),
+            ("Вимірюваний ефект", "Рахуємо, скільки годин на місяць це реально економить."),
+        ])), None),
+        ("cta", cta("Почнемо з одного процесу", "Запускаємо на ваших реальних даних і міряємо, скільки часу це економить.", "Написати в дірект"), SAVE),
+    ],
+    "2026-10-22-ecommerce-sells": [
+        ("cover", cover("E-commerce", 'Інтернет-магазин, який <span class="tl">продає</span>: 7 обов’язкових речей',
+                        "Гарний дизайн — ще не причина купити. Ось що реально впливає на замовлення."), SWIPE),
+        ("b", body("01–04", "Шлях до товару", chk([
+            ("Пошук і фільтри", "Покупець знаходить потрібне за кілька кліків, а не гортає весь каталог."),
+            ("Швидкість на телефоні", "Повільна мобільна сторінка коштує замовлень."),
+            ("Сторінка товару", "Фото, характеристики, наявність і ціна без сюрпризів."),
+            ("Доставка й оплата наперед", "Терміни й вартість видно до кошика, а не на останньому кроці."),
+        ])), None),
+        ("b", body("05–07", "Шлях до оплати", chk([
+            ("Короткий checkout", "Мінімум полів, оформлення без обов’язкової реєстрації."),
+            ("Довіра", "Контакти, умови повернення, реальні відгуки."),
+            ("Аналітика воронки", "Видно, на якому кроці люди кидають кошик."),
+        ]) + note("Кожен пункт — це не «фіча», а місце, де магазин або втрачає покупця, або ні.")), None),
+        ("cta", cta("Робимо магазини під продажі", "Каталог, оплата, доставка й інтеграції з обліком.", "Обговорити магазин"), SAVE),
+    ],
+    "2026-10-23-website-myths": [
+        ("cover", cover("Міфи", '4 міфи про сайти, <span class="tl">які коштують грошей</span>',
+                        "У кожен з них вірять на старті — і платять за це вже після запуску."), SWIPE),
+        ("b", big("01", body("Міф", "«Сайт роблять раз і назавжди»",
+                             labeled("Насправді", "Сайт — це продукт: оновлення, безпека, правки за аналітикою. Без підтримки він застаріває за рік-два."))), None),
+        ("b", big("02", body("Міф", "«Головне — щоб було красиво»",
+                             labeled("Насправді", "Красиво — необхідно, але продають швидкість, зрозуміла структура й простий шлях до заявки."))), None),
+        ("b", big("03", body("Міф", "«SEO зробимо потім»",
+                             labeled("Насправді", "Структуру, швидкість і розмітку закладають на старті. «Потім» зазвичай означає переробку."))), None),
+        ("b", big("04", body("Міф", "«Мобільна версія — це зменшений десктоп»",
+                             labeled("Насправді", "На телефоні інші сценарії: одна рука, повільний інтернет, короткі сесії. Інтерфейс проєктують окремо."))), None),
+        ("cta", cta("Будуємо сайти без цих міфів", "Підтримка, швидкість і SEO-база — з першого дня.", "Написати в дірект"), SAVE),
+    ],
+    "2026-10-24-first-call-prep": [
+        ("cover", cover("Перед стартом", 'Перед дзвінком зі студією: <span class="tl">6 питань до себе</span>',
+                        "10 хвилин підготовки — і розмова одразу про суть, а оцінка точніша."), SWIPE),
+        ("b", body("Питання 1–3", "Про бізнес", nlist([
+            ("Яка мета сайту?", "Заявки, продажі, найм, довіра — що саме має статися?"),
+            ("Хто ваш клієнт?", "Хто заходитиме на сайт і що хоче там знайти."),
+            ("Що вже подобається?", "2–3 приклади сайтів — і чим саме вони подобаються."),
+        ])), None),
+        ("b", body("Питання 4–6", "Про проєкт", nlist([
+            ("З чим має інтегруватись?", "CRM, оплата, облік, месенджери."),
+            ("Чи готовий контент?", "Тексти, фото, логотип — є чи треба створити."),
+            ("Терміни й бюджет", "Навіть приблизна вилка допомагає запропонувати реалістичний варіант."),
+        ], 4)), None),
+        ("cta", cta("Ці питання — і є наш бриф", "Відповіли — пишіть, решту розберемо на дзвінку.", "Записатися на дзвінок"), SAVE),
+    ],
+    "2026-10-25-ai-glossary": [
+        ("cover", cover("Словник ШІ", 'ШІ без жаргону: <span class="tl">8 термінів</span>',
+                        "Щоб розуміти, що вам пропонують, і ставити підрядникам правильні питання.",
+                        tags("LLM", "Промпт", "Токен", "Контекст", "Ембединг", "RAG", "Агент", "Галюцинація")), SWIPE),
+        ("b", '<div class="tight">' + body("Терміни 1–4", "Як працює модель", nlist([
+            ("LLM", "Велика мовна модель — програма, що генерує текст. GPT, Claude, Llama — це LLM."),
+            ("Промпт", "Інструкція або запит до моделі. Від нього сильно залежить відповідь."),
+            ("Токен", "Шматочок тексту, яким модель рахує слова. В API платять саме за токени."),
+            ("Контекстне вікно", "Скільки тексту модель враховує за раз: питання, історію, документи."),
+        ])) + "</div>", None),
+        ("b", '<div class="tight">' + body("Терміни 5–8", "Як її застосовують", nlist([
+            ("Ембединг", "Текст, перетворений на числа, щоб шукати схоже за змістом."),
+            ("RAG", "Модель спершу шукає відповідь у ваших документах, а потім її формулює."),
+            ("Агент", "Модель, що не лише відповідає, а й діє: шукає, пише в CRM, надсилає листи."),
+            ("Галюцинація", "Впевнена, але вигадана відповідь. Лікується даними й перевірками."),
+        ], 5)) + "</div>", None),
+        ("cta", cta("Пояснюємо, а не продаємо слова", "Розберемо, що з цього справді потрібно вашому бізнесу.", "Поставити питання"), SAVE),
+    ],
+    "2026-10-26-selfhosted-vs-api": [
+        ("cover", cover("ШІ · архітектура", 'Своя модель на сервері чи <span class="tl">API</span>?',
+                        "Одне з перших рішень у ШІ-проєкті. Від нього залежать вартість, швидкість запуску і те, де живуть ваші дані."), SWIPE),
+        ("b", body("Варіант 1", "Модель через API провайдера", procon(
+            ["Швидкий старт без серверів", "Найсильніші моделі", "Оплата за використання"],
+            ["Дані передаються провайдеру", "Вартість росте з обсягом", "Залежність від умов провайдера"])), None),
+        ("b", body("Варіант 2", "Своя модель на вашому сервері", procon(
+            ["Дані не виходять за межі вашої інфраструктури", "Передбачувана вартість на великих обсягах", "Повний контроль над версією"],
+            ["Потрібен GPU-сервер і супровід", "Відкриті моделі зазвичай слабші за топові", "Довший запуск"])), None),
+        ("b", body("Як обрати", "Коротке правило", nlist([
+            ("Перевіряєте ідею", "Почніть з API: швидко й без капітальних витрат."),
+            ("Чутливі дані", "Дивіться в бік своєї моделі або приватного розгортання."),
+            ("Великі стабільні обсяги", "Порахуйте: своя модель може вийти дешевшою."),
+        ]) + note("Часто найкраще — гібрид: чутливе обробляється локально, решта — через API.")), None),
+        ("cta", cta("Розгортаємо обидва варіанти", "Інтеграції через API і моделі на вашому сервері: Ollama, vLLM, приватна інфраструктура.", "Обговорити проєкт"), SAVE),
+    ],
+})
+
+def main():
+    global POSTS
+    ONLY = set(sys.argv[1:])
+    if ONLY:
+        POSTS = {k: v for k, v in POSTS.items() if k in ONLY}
+
+    out_root = HERE / "out"
+    html_parts = []
     for slug, slides in POSTS.items():
-        d = out_root / slug
-        d.mkdir(parents=True, exist_ok=True)
-        for i in range(1, len(slides) + 1):
+        total = len(slides)
+        for i, (kind, inner, right) in enumerate(slides, 1):
             sid = f"{slug}--{i:02d}"
-            # overflow check: footer must sit inside the slide
-            ov = pg.evaluate(f"""(()=>{{const s=document.getElementById('{sid}');const f=s.querySelector('.foot');
-                const sb=s.getBoundingClientRect(), fb=f.getBoundingClientRect(); return fb.bottom>sb.bottom-40}})()""")
-            pg.locator(f'[id="{sid}"]').screenshot(path=str(d / f"{i:02d}.png"))
-            if ov:
-                print("OVERFLOW", sid)
-    b.close()
-print("done")
+            foot_right = right if right else "Далі →"
+            foot_left = "weblab.llc"
+            html_parts.append(slide(sid, i, total, inner, foot_right, foot_left))
+
+    page = head + "<body>" + defs + "\n".join(html_parts) + "</body></html>"
+    (HERE / "posts.html").write_text(page)
+
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        pg = b.new_page(viewport={"width": 1080, "height": 1350})
+        pg.goto((HERE / "posts.html").resolve().as_uri())
+        pg.evaluate("document.fonts.ready")
+        pg.wait_for_timeout(700)
+        for slug, slides in POSTS.items():
+            d = out_root / slug
+            d.mkdir(parents=True, exist_ok=True)
+            for i in range(1, len(slides) + 1):
+                sid = f"{slug}--{i:02d}"
+                # overflow check: footer must sit inside the slide
+                ov = pg.evaluate(f"""(()=>{{const s=document.getElementById('{sid}');const f=s.querySelector('.foot');
+                    const sb=s.getBoundingClientRect(), fb=f.getBoundingClientRect(); return fb.bottom>sb.bottom-40}})()""")
+                pg.locator(f'[id="{sid}"]').screenshot(path=str(d / f"{i:02d}.png"))
+                if ov:
+                    print("OVERFLOW", sid)
+        b.close()
+    print("done")
+
+
+if __name__ == "__main__":
+    main()

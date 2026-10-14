@@ -10,3 +10,9 @@ Setup (once): `npm i @fontsource/google-sans @fontsource/jetbrains-mono` next to
 `pip install playwright && playwright install chromium`.
 
 Flask geometry and colors mirror `weblabllc/WebLab` → `src/brand/flask.js`, `src/styles/global.scss`.
+
+## Video covers (Higgsfield)
+
+`overlay.py <slug> <clip.mp4>` puts slide 01 of a post (title, logo, footer) over a clip and writes
+`cover-4x5.mp4` (carousel slide 01), `reel-9x16.mp4` and a still `cover-4x5.jpg`. Needs ffmpeg.
+Prompts and clip settings: `../higgsfield/PROMPTS.md`.
