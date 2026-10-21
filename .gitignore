@@ -1,3 +1,6 @@
 out/
 _overlay.html
 node_modules/
+out-paper/
+paper.html
+posts.html
