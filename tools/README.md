@@ -24,3 +24,5 @@ Prompts and clip settings: `../higgsfield/PROMPTS.md`.
 ## Reels
 
 `reels.py <slug>` renders a 1080×1920 kinetic-type Reel (`reel_engine.py`: scene zoom/blur transitions, frosted-glass wipes, line-mask text, counters, strikes) to `out-reels/<slug>/reel.mp4` + `cover.jpg`. `reels.py --preview` makes a quick frame sheet without video. Finished reels live in `../reels/`.
+
+`reel_audio.py <slug>` synthesises an original lo-fi bed + transition SFX synced to the reel timeline and muxes it in at -14 LUFS (no samples, no licensed music).
