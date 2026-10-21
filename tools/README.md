@@ -20,3 +20,7 @@ Prompts and clip settings: `../higgsfield/PROMPTS.md`.
 ## Paper theme
 
 `build_paper.py` renders the light editorial variant (paper ground, ink text, amber accent, dark CTA slide) from the same content. Used from 22.10 to break up the dark rows in the grid.
+
+## Reels
+
+`reels.py <slug>` renders a 1080×1920 kinetic-type Reel (`reel_engine.py`: scene zoom/blur transitions, frosted-glass wipes, line-mask text, counters, strikes) to `out-reels/<slug>/reel.mp4` + `cover.jpg`. `reels.py --preview` makes a quick frame sheet without video. Finished reels live in `../reels/`.
