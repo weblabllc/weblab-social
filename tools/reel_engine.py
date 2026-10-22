@@ -181,13 +181,15 @@ def scene(a, b, body, tin="zoom", tout="zoom", style=""):
     return f'<div class="scene" data-a="{a}" data-b="{b}" data-tin="{tin}" data-tout="{tout}" style="{style}">{body}</div>'
 
 
-def endcard(a, b, title, sub, button):
+def endcard(a, b, title, sub, button, btn_at=.8):
     body = (f'<svg class="fx" data-fx="pop" data-at="0.05" width="170" height="196" style="overflow:visible; margin-bottom:64px">'
             f'<use href="#flask" width="170" height="196"/></svg>'
             + mask(title, "h3", .15, "font-size:76px")
             + f'<p class="p fx" data-fx="rise" data-at=".55" style="margin-top:36px">{sub}</p>'
-            + f'<div class="fx" data-fx="pop" data-at=".8" style="margin-top:64px"><span class="btn">{button}</span></div>'
-            + '<p class="fx dim" data-fx="rise" data-at="1.0" style="margin-top:40px; font-size:38px">weblab.llc</p>')
+            + (f'<div class="fx" data-fx="pop" data-at="{btn_at}" style="margin-top:64px"><span class="btn">{button}</span></div>'
+               + f'<p class="fx dim" data-fx="rise" data-at="{max(1.0, btn_at + .2):.2f}" style="margin-top:40px; font-size:38px">weblab.llc</p>'
+               if button else
+               f'<div class="fx" data-fx="pop" data-at="{btn_at}" style="margin-top:64px"><span class="btn">weblab.llc</span></div>'))
     return scene(a, b, body, tin="cut", tout="cut")
 
 
